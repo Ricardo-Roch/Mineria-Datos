@@ -5,7 +5,7 @@ import urllib.request  # descargar la cosa
 url = "https://datos.cdmx.gob.mx/tl/dataset/nacimientos-registrados-en-la-ciudad-de-mexico"
 
 
-#        |Analiza la cosa|PeticionGet|                                  |Busca que termine en .csv|                |Obtiene el link wiiii
+#        |Analiza la cosa|PeticionGet|                                  |Busca que termine en .csv| |Obtiene el link wiiii
 csv_link = BeautifulSoup(requests.get(url).text, 'html.parser').find('a', href=re.compile(r'\.csv$')).get('href')
 
 #         Se descarga y ya
