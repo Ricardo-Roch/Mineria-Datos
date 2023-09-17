@@ -3,16 +3,6 @@ import pandas as pd
 # Lee el archivo CSV en un DataFrame de pandas
 df = pd.read_csv('Nacimientos2020-2023.csv')
 
-# Guardo los datos del tutor 1 en otro csv
-nuevo_df = df[['tutora_1_edad','tutora_1_sexo','tutora_1_nacionalidad']]
-# Guarda el nuevo DataFrame en un nuevo archivo CSV
-nuevo_df.to_csv('Datos_tutor_1.csv', index=False)
-
-# Guardo los datos del tutor 2 en otro csv
-nuevo_df = df[['tutora_2_edad','tutora_2_sexo','tutora_2_nacionalidad']]
-# Guarda el nuevo DataFrame en un nuevo archivo CSV
-nuevo_df.to_csv('Datos_tutor_2.csv', index=False)
-
 #Eliminar columas inecesarias
 df = df.drop('anio', axis=1)
 df = df.drop('mes', axis=1)
