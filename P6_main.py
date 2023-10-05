@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 if not os.path.exists('imagenes/Graficas'):
     os.makedirs('imagenes/Graficas')
 
-df = pd.read_csv('Actualizacion-Nacimientos2020-2023.csv', nrows=150000)#Modificar este parametro para ver mas datos en la grafica o si tu compu tiene mucha galleta
+df = pd.read_csv('Actualizacion-Nacimientos2020-2023.csv', nrows=185000)#Modificar este parametro para ver mas datos en la grafica o si tu compu tiene mucha galleta
 df['fecha_nacimiento'] = pd.to_datetime(df['fecha_nacimiento'])
 
 #fecha de inicio para calcular los días transcurridos
