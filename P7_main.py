@@ -1,5 +1,5 @@
 from statistics import mode
-from typing import Tuple, List
+from typing import List
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -9,29 +9,6 @@ df = pd.read_csv('Actualizacion-Nacimientos2020-2023.csv')
 
 def imprime_tabla(df: pd.DataFrame):
     print(tabulate(df, headers='keys', tablefmt="orgtbl"))
-
-def normalize_distribution(dist: np.array, n: int) -> np.array:
-    b = dist - min(dist) + 0.000001
-    c = (b / np.sum(b)) * n
-    return np.round(c)
-
-def create_distribution(mean: float, size: int) -> pd.Series:
-    return pd.Series(normalize_distribution(np.random.standard_normal(size), mean * size))
-
-def generate_df(edades: List[int], etiquetas: List[str], n: int) -> pd.DataFrame:
-    groups = [(np.random.uniform(edades[i], edades[i + 1]), np.random.uniform(edades[i], edades[i + 1]), etiquetas[i]) for i in range(len(edades) - 1)]
-    lists = [
-        (create_distribution(_x, n), create_distribution(_y, n), np.repeat(_l, n))
-        for _x, _y, _l in groups
-    ]
-    x = np.array([])
-    y = np.array([])
-    labels = np.array([])
-    for _x, _y, _l in lists:
-        x = np.concatenate((x, _x), axis=None)
-        y = np.concatenate((y, _y))
-        labels = np.concatenate((labels, _l))
-    return pd.DataFrame({"x": x, "y": y, "label": labels})
 
 def scatter_group_by(file_path: str, df: pd.DataFrame, x_column: str, y_column: str, label_column: str):
     fig, ax = plt.subplots()
@@ -71,20 +48,17 @@ def k_nearest_neightbors(points: np.array, labels: np.array, input_data: List[np
 edades = [0, 18, 30, 50, 100]
 etiquetas = ['0-18', '19-30', '31-50', '51-100']
 
-#columna "GrupoEdad" que contendrá las etiquetas de los grupos
+# Crea una nueva columna "GrupoEdad" que contendrá las etiquetas de los grupos
 df['GrupoEdad'] = pd.cut(df['tutora_2_edad'], bins=edades, labels=etiquetas)
 
-#dataFrame basado en las edades y etiquetas definidas
-df_grupos = generate_df(edades, etiquetas, 50)
+# Define un diccionario que asigna etiquetas a números
+label_to_number = {label: i for i, label in enumerate(df['GrupoEdad'].unique())}
+number_to_label = {i: label for i, label in enumerate(df['GrupoEdad'].unique())}
 
-#diccionario que asigna etiquetas a números
-label_to_number = {label: i for i, label in enumerate(df_grupos['label'].unique())}
-number_to_label = {i: label for i, label in enumerate(df_grupos['label'].unique())}
-
-scatter_group_by("imagenes/Graficas/grafico_dispersion_agrupado.png", df_grupos, "x", "y", "label")
+scatter_group_by("imagenes/Graficas/grafico_dispersion_agrupado.png", df, "tutora_1_edad", "tutora_2_edad", "GrupoEdad")
 
 input_data = [np.array([100, 150]), np.array([1, 1]), np.array([1, 300]), np.array([80, 40])]
 k = 5
-predicted_labels = k_nearest_neightbors(df_grupos[['x', 'y']].to_numpy(), df_grupos['label'].to_numpy(), input_data, k)
+predicted_labels = k_nearest_neightbors(df[['tutora_1_edad', 'tutora_2_edad']].to_numpy(), df['GrupoEdad'].to_numpy(), input_data, k)
 
 print(predicted_labels)
