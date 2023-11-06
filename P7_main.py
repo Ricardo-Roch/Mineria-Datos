@@ -1,64 +1,75 @@
-from statistics import mode
-from typing import List
-import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-from tabulate import tabulate
+import matplotlib.pyplot as plt
+import numpy as np
 
-df = pd.read_csv('Actualizacion-Nacimientos2020-2023.csv')
+# Cargar el DataFrame con tu archivo CSV
+df = pd.read_csv("Actualizacion-Nacimientos2020-2023.csv")
 
-def imprime_tabla(df: pd.DataFrame):
-    print(tabulate(df, headers='keys', tablefmt="orgtbl"))
+# Función para crear grupos de edades
+def create_age_groups(df):
+    age_groups = []
+    for age in df['tutora_1_edad']:
+        if age >= 0 and age <= 18:
+            age_group = '0-18'
+        elif age >= 19 and age <= 30:
+            age_group = '19-30'
+        elif age >= 31 and age <= 50:
+            age_group = '31-50'
+        else:
+            age_group = '51-100'
+        age_groups.append(age_group)
+    df['age_group'] = age_groups
 
-def scatter_group_by(file_path: str, df: pd.DataFrame, x_column: str, y_column: str, label_column: str):
+# Llamar a la función para crear grupos de edades
+create_age_groups(df)
+
+# Convertir la columna "tutora_1_nacionalidad" a cadenas
+df['tutora_1_nacionalidad'] = df['tutora_1_nacionalidad'].astype(str)
+
+# Definir una paleta de colores personalizada para cada rango de edad
+colors = {'0-18': 'red', '19-30': 'green', '31-50': 'blue', '51-100': 'purple'}
+
+# Función para realizar el scatter plot de los grupos de edades con colores personalizados y guardar la gráfica
+def scatter_age_groups(df, x_column, y_column, label_column, k_neighbors):
     fig, ax = plt.subplots()
-    labels = pd.unique(df[label_column])
-    cmap = plt.get_cmap("hsv", len(labels) + 1)
+    labels = df[label_column].unique()
 
-    for i, label in enumerate(labels):
-        filter_df = df.query(f"{label_column} == '{label}'")
-        ax.scatter(filter_df[x_column], filter_df[y_column], label=label, color=cmap(i))
+    for label in labels:
+        filter_df = df[df[label_column] == label]
+        ax.scatter(filter_df[x_column], filter_df[y_column], label=label, color=colors[label])
 
     ax.legend()
-    plt.xlabel("Eje X")  # Etiqueta del eje X
-    plt.ylabel("Eje Y")  # Etiqueta del eje Y
-    plt.savefig(file_path)
-    plt.close()
+    plt.xlabel(x_column)
+    plt.ylabel(y_column)
+    plt.title('Scatter Plot de Grupos de Edades')
+    plt.savefig('imagenes/Graficas/scatter_dispersion_agrupado.png')  # Guardar la gráfica en un archivo
+    plt.show()
 
-def euclidean_distance(p_1: np.array, p_2: np.array) -> float:
-    return np.sqrt(np.sum((p_2 - p_1) ** 2))
+# Llamar a la función para crear el scatter plot de grupos de edades con k=5 y guardar la gráfica
+scatter_age_groups(df, 'tutora_1_edad', 'tutora_1_nacionalidad', 'age_group', k_neighbors=5)
 
-def k_nearest_neightbors(points: np.array, labels: np.array, input_data: List[np.array], k: int):
-    input_distances = [
-        [euclidean_distance(input_point, point) for point in points]
-        for input_point in input_data
-    ]
-    points_k_nearest = [
-        np.argsort(input_point_dist)[:k] for input_point_dist in input_distances
-    ]
+# Función para realizar el scatter plot de "tutora_1_nacionalidad" y el promedio de "tutora_2_edad"
+def scatter_nationality_avg_age(df, x_column, y_column):
+    fig, ax = plt.subplots()
 
-    predicted_labels = [
-        np.argmax(np.bincount([label_to_number[labels[index]] for index in point_nearest]))
-        for point_nearest in points_k_nearest
-    ]
+    # Calcular el promedio de "tutora_2_edad" para cada "tutora_1_nacionalidad"
+    avg_age_by_nationality = df.groupby(x_column)[y_column].mean()
+    unique_nationalities = avg_age_by_nationality.index
 
-    return predicted_labels
+    # Definir una paleta de colores para los puntos en el scatter plot
+    colors = plt.cm.jet(np.linspace(0, 1, len(unique_nationalities)))
 
+    for i, nationality in enumerate(unique_nationalities):
+        avg_age = avg_age_by_nationality[nationality]
+        ax.scatter(nationality, avg_age, label=nationality, color=colors[i])
 
-edades = [0, 18, 30, 50, 100]
-etiquetas = ['0-18', '19-30', '31-50', '51-100']
+    ax.legend()
+    plt.xlabel(x_column)
+    plt.ylabel(f'Promedio de {y_column}')
+    plt.title(f'Scatter Plot de Nacionalidad de Tutora 1 vs. Promedio de {y_column}')
+    plt.xticks(rotation=45)
+    plt.savefig('imagenes/Graficas/scatter_nacionalidad_vs_promedio_edad_tutora_2.png')  # Guardar la gráfica en un archivo
+    plt.show()
 
-# Crea una nueva columna "GrupoEdad" que contendrá las etiquetas de los grupos
-df['GrupoEdad'] = pd.cut(df['tutora_2_edad'], bins=edades, labels=etiquetas)
-
-# Define un diccionario que asigna etiquetas a números
-label_to_number = {label: i for i, label in enumerate(df['GrupoEdad'].unique())}
-number_to_label = {i: label for i, label in enumerate(df['GrupoEdad'].unique())}
-
-scatter_group_by("imagenes/Graficas/grafico_dispersion_agrupado.png", df, "tutora_1_edad", "tutora_2_edad", "GrupoEdad")
-
-input_data = [np.array([100, 150]), np.array([1, 1]), np.array([1, 300]), np.array([80, 40])]
-k = 5
-predicted_labels = k_nearest_neightbors(df[['tutora_1_edad', 'tutora_2_edad']].to_numpy(), df['GrupoEdad'].to_numpy(), input_data, k)
-
-print(predicted_labels)
+# Llamar a la función para crear el scatter plot de "tutora_1_nacionalidad" y el promedio de "tutora_2_edad"
+scatter_nationality_avg_age(df, 'tutora_1_nacionalidad', 'tutora_2_edad')
