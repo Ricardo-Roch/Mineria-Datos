@@ -1,75 +1,68 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from matplotlib.colors import ListedColormap
 
-# Cargar el DataFrame con tu archivo CSV
-df = pd.read_csv("Actualizacion-Nacimientos2020-2023.csv")
+def cargar_datos(ruta_archivo, nrows=None):
+    df = pd.read_csv(ruta_archivo, nrows=nrows)
+    return df
 
-# Función para crear grupos de edades
-def create_age_groups(df):
-    age_groups = []
-    for age in df['tutora_1_edad']:
-        if age >= 0 and age <= 18:
-            age_group = '0-18'
-        elif age >= 19 and age <= 30:
-            age_group = '19-30'
-        elif age >= 31 and age <= 50:
-            age_group = '31-50'
-        else:
-            age_group = '51-100'
-        age_groups.append(age_group)
-    df['age_group'] = age_groups
+def procesar_datos(df):
+    df['fecha_nacimiento'] = pd.to_datetime(df['fecha_nacimiento'])
 
-# Llamar a la función para crear grupos de edades
-create_age_groups(df)
+    bins = [0, 18, 25, 35, 45, 55, 65, 100]
+    labels = ['0-18', '18-25', '26-35', '36-45', '46-55', '56-65', '66+']
+    df['grupo_edad_tutora_1'] = pd.cut(df['tutora_1_edad'], bins=bins, labels=labels, right=False)
 
-# Convertir la columna "tutora_1_nacionalidad" a cadenas
-df['tutora_1_nacionalidad'] = df['tutora_1_nacionalidad'].astype(str)
+    df = df.dropna(subset=['tutora_1_edad', 'grupo_edad_tutora_1'])
 
-# Definir una paleta de colores personalizada para cada rango de edad
-colors = {'0-18': 'red', '19-30': 'green', '31-50': 'blue', '51-100': 'purple'}
+    return df
 
-# Función para realizar el scatter plot de los grupos de edades con colores personalizados y guardar la gráfica
-def scatter_age_groups(df, x_column, y_column, label_column, k_neighbors):
-    fig, ax = plt.subplots()
-    labels = df[label_column].unique()
+def dividir_datos(df):
+    X = df.index.values.reshape(-1, 1)
+    y = df['tutora_1_edad']
 
-    for label in labels:
-        filter_df = df[df[label_column] == label]
-        ax.scatter(filter_df[x_column], filter_df[y_column], label=label, color=colors[label])
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    ax.legend()
-    plt.xlabel(x_column)
-    plt.ylabel(y_column)
-    plt.title('Scatter Plot de Grupos de Edades')
-    plt.savefig('imagenes/Graficas/scatter_dispersion_agrupado.png')  # Guardar la gráfica en un archivo
-    plt.show()
+    return X_train, X_test, y_train, y_test
 
-# Llamar a la función para crear el scatter plot de grupos de edades con k=5 y guardar la gráfica
-scatter_age_groups(df, 'tutora_1_edad', 'tutora_1_nacionalidad', 'age_group', k_neighbors=5)
+def entrenar_modelo(X_train, y_train):
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(X_train, y_train)
+    return knn
 
-# Función para realizar el scatter plot de "tutora_1_nacionalidad" y el promedio de "tutora_2_edad"
-def scatter_nationality_avg_age(df, x_column, y_column):
-    fig, ax = plt.subplots()
+def evaluar_modelo(modelo, X_test, y_test):
+    accuracy = modelo.score(X_test, y_test)
+    print(f"Precisión del modelo KNN: {accuracy * 100:.2f}%")
 
-    # Calcular el promedio de "tutora_2_edad" para cada "tutora_1_nacionalidad"
-    avg_age_by_nationality = df.groupby(x_column)[y_column].mean()
-    unique_nationalities = avg_age_by_nationality.index
+def graficar_dispersion(X_test, y_test, cmap, save_path=None):
+    plt.figure(figsize=(15, 6))
 
-    # Definir una paleta de colores para los puntos en el scatter plot
-    colors = plt.cm.jet(np.linspace(0, 1, len(unique_nationalities)))
+    scatter = plt.scatter(X_test, y_test, c=y_test, cmap=cmap, marker='o', alpha=0.7, edgecolors='w')
 
-    for i, nationality in enumerate(unique_nationalities):
-        avg_age = avg_age_by_nationality[nationality]
-        ax.scatter(nationality, avg_age, label=nationality, color=colors[i])
+    plt.title('Gráfica de Dispersión de las Edades y Predicciones')
+    plt.xlabel('Índice de Filas')
+    plt.ylabel('Edad de Tutora 1')
+    plt.colorbar(scatter, label='Edad de Tutora 1')
 
-    ax.legend()
-    plt.xlabel(x_column)
-    plt.ylabel(f'Promedio de {y_column}')
-    plt.title(f'Scatter Plot de Nacionalidad de Tutora 1 vs. Promedio de {y_column}')
-    plt.xticks(rotation=45)
-    plt.savefig('imagenes/Graficas/scatter_nacionalidad_vs_promedio_edad_tutora_2.png')  # Guardar la gráfica en un archivo
-    plt.show()
+    plt.xticks([])
 
-# Llamar a la función para crear el scatter plot de "tutora_1_nacionalidad" y el promedio de "tutora_2_edad"
-scatter_nationality_avg_age(df, 'tutora_1_nacionalidad', 'tutora_2_edad')
+    if save_path:
+        plt.savefig(save_path)
+        print(f"La gráfica ha sido guardada en: {save_path}")
+    else:
+        plt.show()
+
+def main():
+    df = cargar_datos('Actualizacion-Nacimientos2020-2023.csv', nrows=5000)
+    df = procesar_datos(df)
+    X_train, X_test, y_train, y_test = dividir_datos(df)
+    modelo = entrenar_modelo(X_train, y_train)
+    evaluar_modelo(modelo, X_test, y_test)
+    save_path = 'imagenes/Graficas/scatter_dispersion_agrupado.png'
+    cmap = ListedColormap(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'])
+    graficar_dispersion(X_test, y_test, cmap, save_path)
+
+if __name__ == "__main__":
+    main()
