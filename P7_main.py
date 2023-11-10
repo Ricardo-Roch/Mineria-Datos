@@ -60,7 +60,7 @@ def main():
     X_train, X_test, y_train, y_test = dividir_datos(df)
     modelo = entrenar_modelo(X_train, y_train)
     evaluar_modelo(modelo, X_test, y_test)
-    save_path = 'imagenes/Graficas/scatter_dispersion_agrupado.png'
+    save_path = 'imagenes/Graficas/P7scatter_dispersion_agrupado.png'
     cmap = ListedColormap(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'])
     graficar_dispersion(X_test, y_test, cmap, save_path)
 
