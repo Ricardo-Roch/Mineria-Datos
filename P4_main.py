@@ -22,6 +22,34 @@ def grafica_conteo_sexo(df):
     #muestra la gráfica
     plt.show()
 
+def grafica_histograma_combinaciones_sexo_tutoras(df):
+    plt.figure(figsize=(12, 6))  # Ajustar el tamaño
+    # Filtrar por combinaciones de tutoras
+    mujer_mujer = df[(df['tutora_1_sexo'] == 'Mujer') & (df['tutora_2_sexo'] == 'Mujer')]
+    hombre_hombre = df[(df['tutora_1_sexo'] == 'Hombre') & (df['tutora_2_sexo'] == 'Hombre')]
+
+    # Crear histograma
+    plt.hist([mujer_mujer['tutora_1_edad'], hombre_hombre['tutora_1_edad']], bins=20, alpha=0.7, label=['Mujer-Mujer', 'Hombre-Hombre'])
+
+    # Etiquetas y título
+    plt.xlabel('Edad del Tutor 1 y Tutor 2')
+    plt.ylabel('Cantidad de Personas')
+    plt.title('Histograma de Edades de los Tutores 1 y 2 por Combinación de Tutoras')
+
+    # Establecer las edades en el eje X
+    edades = sorted(set(mujer_mujer['tutora_1_edad']).union(set(hombre_hombre['tutora_1_edad'])))
+    plt.xticks(edades)
+
+    # Mostrar leyenda
+    plt.legend()
+
+    # Ajustar diseño y guardar la gráfica
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'grafica_histograma_combinaciones_sexo_tutoras.png'))
+
+    # Mostrar la gráfica
+    plt.show()
+
 def grafica_nacimientos_por_mes(df):
     #'fecha_nacimiento' al tipo de dato datetime
     df['fecha_nacimiento'] = pd.to_datetime(df['fecha_nacimiento'])
@@ -122,6 +150,4 @@ grafica_nacimientos_por_mes(df)
 grafica_histograma_edad_tutora(df)
 grafica_distribucion_nacimientos_por_estado(df)
 grafica_tutores_ededad_nacionalidad(df)
-
-
-
+grafica_histograma_combinaciones_sexo_tutoras(df)
