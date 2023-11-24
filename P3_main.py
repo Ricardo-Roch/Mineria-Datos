@@ -23,3 +23,28 @@ print('Varianza del tutor 2:', varianza_tutora_2_edad)                          
 print('Desviación estándar del tutor 2:', desviacion_estandar_tutora_2_edad)                #DsvEst
 print('Asimetria del tutor 1:', asimetria_tutora_1_edad)                                    #Asimetria
 print('Kurtosis del tutor 2:', kurtosis_tutora_2_edad)                                      #Kurtosis
+
+
+
+mujer_mujer = df[(df['tutora_1_sexo'] == 'Mujer') & (df['tutora_2_sexo'] == 'Mujer')]
+hombre_hombre = df[(df['tutora_1_sexo'] == 'Hombre') & (df['tutora_2_sexo'] == 'Hombre')]
+conteo_mujer_mujer = len(mujer_mujer)
+conteo_hombre_hombre = len(hombre_hombre)
+
+hm=conteo_mujer_mujer+conteo_hombre_hombre
+print(f"Cantidad de combinaciones mujer-mujer: {conteo_mujer_mujer}")
+print(f"Cantidad de combinaciones hombre-hombre: {conteo_hombre_hombre}")
+print(f"Cantidad de combinaciones: {hm}")
+
+
+
+# Contar cuántos tutores tienen la edad mínima
+tutores_minima_edad = df[df['tutora_1_edad'] == min_tutora_1_edad]
+conteo_tutores_minima_edad = len(tutores_minima_edad)
+
+#tutores_maxima_edad = df[df['tutora_2_edad'] == max_tutora_2_edad]
+#conteo_tutores_maxima_edad = len(tutores_maxima_edad)
+
+# Imprimir los resultados
+print(f"Cantidad de tutores con la edad mínima: {conteo_tutores_minima_edad}")
+#print(f"Cantidad de tutores con la edad máxima: {conteo_tutores_maxima_edad}")
