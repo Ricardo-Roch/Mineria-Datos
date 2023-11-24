@@ -48,3 +48,4 @@ conteo_tutores_minima_edad = len(tutores_minima_edad)
 # Imprimir los resultados
 print(f"Cantidad de tutores con la edad mínima: {conteo_tutores_minima_edad}")
 #print(f"Cantidad de tutores con la edad máxima: {conteo_tutores_maxima_edad}")
+#pm

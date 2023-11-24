@@ -56,3 +56,4 @@ generar_grafica(df_60k, 'P9_Regresion_lineal_con_Forecasting2.png', 60000)
 #generar gráfica con 175,000 registros
 df_175k = pd.read_csv('Actualizacion-Nacimientos2020-2023.csv', nrows=175000)
 generar_grafica(df_175k, 'P9_Regresion_lineal_con_Forecasting3.png', 175000)
+#pm

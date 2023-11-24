@@ -40,3 +40,4 @@ conteo_palabras = contar_palabras(textos_limpios)
 nombre_archivo = 'P10_Nube-palabras'
 titulo_nube = 'Nube de Palabras - Alcaldías de Nacimiento'
 generar_nube_palabras(conteo_palabras, nombre_archivo, titulo_nube)
+#pm

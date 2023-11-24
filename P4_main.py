@@ -151,3 +151,4 @@ grafica_histograma_edad_tutora(df)
 grafica_distribucion_nacimientos_por_estado(df)
 grafica_tutores_ededad_nacionalidad(df)
 grafica_histograma_combinaciones_sexo_tutoras(df)
+#pm
