@@ -39,3 +39,4 @@ plt.savefig(os.path.join('imagenes/Graficas', 'Regresion lineal.png'))
 
 plt.tight_layout()
 plt.show()
+#merge

@@ -13,3 +13,4 @@ anova_table = sm.stats.anova_lm(modelo, typ=2)
 
 print("Tabla de ANOVA:")
 print(anova_table)
+#merge
